@@ -28,6 +28,12 @@ body {
   background-color: #F0F0F0;
 }
 
+.propertyTextbox {
+  color: #000000;
+  width: 95%;
+  height: 22px;
+}
+
 .toolbarExportExcel {
   background-image: url(/Images/excel-xls-icon.png);
   background-size: 24px;
@@ -42,8 +48,15 @@ body {
   background-position: center;
 }
 
-.alignItem{
+.saveToRevitButton {
+  background-image: url(/Images/revit.png);
+  background-size: 24px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.alignItem {
   cursor: pointer;
-  background: none;   
+  background: none;
   color: #FFFFFF;
 }
