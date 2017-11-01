@@ -98,9 +98,15 @@ namespace DataManagementSample.Controllers
       try
       {
         dynamic existingActivity = await activityApi.GetActivityAsync(ACTIVITY_NAME);
+        await activityApi.DeleteActivityAsync(ACTIVITY_NAME);
       }
       catch
       {
+
+      }
+
+      try
+      { 
         JObject instructions = new JObject
         {
           new JProperty("CommandLineParameters",  ""),
@@ -112,7 +118,12 @@ namespace DataManagementSample.Controllers
             new JObject
             {
               new JProperty("Name", "HostDwg"),
-              new JProperty("LocalFileName", "$(HostDwg)")
+              new JProperty("LocalFileName", "$(HostDwg)"),
+            },
+            new JObject
+            {
+              new JProperty("Name", "Params"),
+              new JProperty("LocalFileName", "params.json"),
             }
           }),
           new JProperty("OutputParameters", new JArray
@@ -126,19 +137,23 @@ namespace DataManagementSample.Controllers
         Activity activity = new Activity(ACTIVITY_NAME, instructions, new List<string>() { PACKAGE_NAME }, "29.4", parameters, null, 1, null, null, false);
         dynamic newActivity = await activityApi.CreateActivityAsync(activity);
       }
+      catch(Exception e)
+      {
+      }
+
 
       // ********************************************
       // Prepare the intput & output location
       // In this case we need a new version for this item
       // and the respective storage location
+      string[] idParams = input.versionUrl.Split('/');
+      string projectId = idParams[idParams.Length - 3];
+      string versionId = idParams[idParams.Length - 1];
+
       string downloadUrl = string.Empty;
       string uploadUrl = string.Empty;
       try
       {
-        string[] idParams = input.versionUrl.Split('/');
-        string projectId = idParams[idParams.Length - 3];
-        string versionId = idParams[idParams.Length - 1];
-
         VersionsApi versionApi = new VersionsApi();
         versionApi.Configuration.AccessToken = AccessToken3Legged;
         dynamic version = await versionApi.GetVersionAsync(projectId, versionId);
@@ -175,16 +190,7 @@ namespace DataManagementSample.Controllers
         objectName = storageIdParams[storageIdParams.Length - 1];
 
         uploadUrl = string.Format("https://developer.api.autodesk.com/oss/v2/buckets/{0}/objects/{1}", bucketKey, objectName);
-      }
-      catch (Exception e)
-      {
 
-      }
-
-      // ********************************************
-      // Create Workitem
-      try
-      {
         JObject arguments = new JObject
         {
           new JProperty(
@@ -200,7 +206,15 @@ namespace DataManagementSample.Controllers
                     new JProperty("Value", "Bearer " + AccessToken3Legged)
                   }
                 }),
-                new JProperty("Name",  "HostDwg")
+                new JProperty("Name",  "HostDwg"),
+              },
+              {
+                new JObject
+                {
+                  new JProperty("ResourceKind", "Embedded"),
+                  new JProperty("Resource", "data:application/json, " + input.input),
+                  new JProperty("Name",  "Params")
+                }
               }
             }
           ),
@@ -236,8 +250,60 @@ namespace DataManagementSample.Controllers
         string statusName = status.Status;
         string statusReport = status.StatusDetails.Report;
 
-     
-                
+        // Create a new version 
+        ProjectsApi projectsApi = new ProjectsApi();
+        CreateVersion newVersionData = new CreateVersion
+        (
+           new JsonApiVersionJsonapi(JsonApiVersionJsonapi.VersionEnum._0),
+           new CreateVersionData
+           (
+             CreateVersionData.TypeEnum.Versions,
+             new CreateStorageDataAttributes
+             (
+               fileName,
+               new BaseAttributesExtensionObject
+               (
+                 "versions:autodesk.core:File",
+                 "1.0",
+                 new JsonApiLink(null),
+                 null
+               )
+             ),
+             new CreateVersionDataRelationships
+             (
+                new CreateVersionDataRelationshipsItem
+                (
+                  new CreateVersionDataRelationshipsItemData
+                  (
+                    CreateVersionDataRelationshipsItemData.TypeEnum.Items,
+                    item.data.id
+                  )
+                ),
+                new CreateItemRelationshipsStorage
+                (
+                  new CreateItemRelationshipsStorageData
+                  (
+                    CreateItemRelationshipsStorageData.TypeEnum.Objects,
+                    storageCreated.data.id
+                  )
+                )
+             )
+           )
+        );
+        dynamic newVersion = await projectsApi.PostVersionAsync(projectId, newVersionData);
+        /*CreateVersion newVersionData = new CreateVersion(
+          new JsonApiVersionJsonapi(JsonApiVersionJsonapi.VersionEnum._0),
+           new CreateVersionData(
+              
+              new CreateStorageDataAttributes(fileName, new BaseAttributesExtensionObject("versions:autodesk.core:File", "1.0", null, null)),
+              new CreateVersionDataRelationships(
+                new CreateVersionDataRelationshipsItem(
+                  new CreateVersionDataRelationshipsItemData(CreateVersionDataRelationshipsItemData.TypeEnum.Items,
+                  item.data.id)),
+                new CreateItemRelationshipsStorage(
+                  new CreateItemRelationshipsStorageData(CreateItemRelationshipsStorageData.TypeEnum.Objects,
+                  storageCreated.data.id)))));*/
+
 
         return statusName;
       }
