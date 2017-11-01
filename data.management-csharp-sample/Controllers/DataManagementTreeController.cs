@@ -243,7 +243,10 @@ namespace DataManagementSample.Controllers
       {
         DateTime versionDate = version.Value.attributes.lastModifiedTime;
         string urn = string.Empty;
-        try { urn = (string)version.Value.relationships.derivatives.data.id; }
+        try {
+          urn = (string)version.Value.relationships.derivatives.data.id;
+          urn = System.Web.HttpUtility.UrlDecode(version.Value.links.self.href);
+        }
         catch { urn = "not_available"; } // some BIM 360 versions don't have viewable
         TreeNode node = new TreeNode(urn, versionDate.ToString("dd/MM/yy HH:mm:ss"), "versions", false);
         nodes.Add(node);

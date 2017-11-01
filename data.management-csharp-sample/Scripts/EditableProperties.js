@@ -63,6 +63,7 @@ Autodesk.ADN.Viewing.Extension.MetaProperties = function (viewer, options) {
 
     var _panel = this;
     var _properties = options.properties;
+    var _versionUrl = options.url;
 
     document.addEventListener("blur", onLeaveTextbox, true);
 
@@ -176,7 +177,6 @@ Autodesk.ADN.Viewing.Extension.MetaProperties = function (viewer, options) {
           value = createTextProperty(property, parent);
         }
         return [name, value];
-        return;
       }
 
       switch (property.dataType) {
@@ -278,7 +278,37 @@ Autodesk.ADN.Viewing.Extension.MetaProperties = function (viewer, options) {
       if (button1 == null && Object.keys(valuesToSubmit).length > 0) {
         button1 = new Autodesk.Viewing.UI.Button('saveToRevit');
         button1.onClick = function (e) {
-          confirm('Save to a new version of this file?');
+          if (!confirm('Save to a new version of this file?'))
+            return;
+
+          var submitArray = [];
+          for (var keyId in valuesToSubmit) {
+            var props = [];
+            for (var keyPropName in valuesToSubmit[keyId].properties) {
+              props.push({ 'name': keyPropName, 'value': valuesToSubmit[keyId].properties[keyPropName] });
+            }
+            submitArray.push({
+              'externalId': valuesToSubmit[keyId].externalId,
+              'properties': props
+            });
+          }
+
+          $.ajax({
+            url: '/api/forge/revitio/updateParameters',
+            contentType: 'application/json',
+            type: 'POST',
+            //dataType: 'json', comment this to avoid parsing the response which would result in an error
+            data: JSON.stringify({
+              'versionUrl': _versionUrl,
+              'input': JSON.stringify(submitArray)
+            }),
+            success: function (res) {
+
+            },
+            error: function (res) {
+
+            }
+          });
         }
         button1.addClass('saveToRevitButton');
         button1.setToolTip('Save changes');
@@ -414,7 +444,7 @@ Autodesk.ADN.Viewing.Extension.MetaProperties = function (viewer, options) {
         function (c) {
           var r = (d + Math.random() * 16) % 16 | 0;
           d = Math.floor(d / 16);
-          return (c == 'x' ? r : (r & 0x7 | 0x8)).toString(16);
+          return (c === 'x' ? r : (r & 0x7 | 0x8)).toString(16);
         });
 
       return guid;

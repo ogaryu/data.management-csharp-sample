@@ -28,6 +28,7 @@ function prepareDataManagementTree() {
   $('#dataManagementHubs').jstree({
     'core': {
       'themes': { "icons": true },
+      'multiple': false,
       'data': {
         "url": '/api/forge/dataManagement/tree',
         "dataType": "json",
@@ -95,7 +96,7 @@ function prepareDataManagementTree() {
     if (data != null && data.node != null && data.node.type == 'versions') {
       if (data.node.id === 'not_available') { alert('No viewable available for this version'); return; }
       var parent_node = $('#dataManagementHubs').jstree(true).get_node(data.node.parent);
-      launchViewer(data.node.id, parent_node.text);
+      launchViewer(btoa( data.node.id.substr(data.node.id.lastIndexOf("/") + 1)).replace('/','_'), parent_node.text);
     }
   });
 }

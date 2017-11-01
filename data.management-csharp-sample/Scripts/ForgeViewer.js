@@ -60,7 +60,8 @@ function onDocumentLoadSuccess(doc) {
 function onDocumentLoadFailure(viewerErrorCode) { }
 
 function onItemLoadSuccess(viewer, item) {
-  NOP_VIEWER.loadExtension('Autodesk.ADN.Viewing.Extension.MetaProperties', { 'properties': ['Comments', 'Mark'] });
+  var treeNode = $('#dataManagementHubs').jstree(true).get_selected(true)[0];
+  NOP_VIEWER.loadExtension('Autodesk.ADN.Viewing.Extension.MetaProperties', { 'url': treeNode.id, 'properties': ['Comments', 'Mark'] });
 }
 
 function onItemLoadFail(errorCode) { }

@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ApplicationPackage SchedmaVersion="1.0" Version="1.0" ProductCode="{68ab237a-379f-4f38-8c81-1b4ce4f37051}" Name="ChangeParameter" Description="Revit Addon dll" Author="Augusto Goncalves (FPD)">
+  <CompanyDetails Name="Autodesk, Inc" Phone="415.555.5555" Url="developer.autodesk.com" Email="forge.help@autodesk.com" />
+  <Components>
+    <RuntimeRequirements  SeriesMax="R29.4" SeriesMin="R29.4" OS="Win64" Platform="Revit" />
+    <ComponentEntry AppName="ChangeParameter" ModuleName="./Contents/ChangeParameter.dll" AppDescription="AddOn DLL" LoadOnCommandInvocation="False" LoadOnRevitStartup="True" />
+  </Components>
+  <EnvironmentVariables>
+  </EnvironmentVariables>
+</ApplicationPackage>
