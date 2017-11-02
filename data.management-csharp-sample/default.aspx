@@ -27,6 +27,7 @@
   <script src="Scripts/Libraries/Blob.js"></script>
   <script src="Scripts/Libraries/FileSaver.min.js"></script>
   <script src="Scripts/Libraries/xlsx.core.min.js"></script>
+  <script src="Scripts/Libraries/notify.min.js"></script>
   <script src="Scripts/ExcelExtension.js"></script>
   <script src="Scripts/EditableProperties.js"></script>
   <script src="Scripts/CivilExtension.js"></script>
@@ -46,6 +47,7 @@
       </ul>
     </div>
   </nav>
+  <div>Autodesk Files<span class="glyphicon glyphicon-refresh refreshIcon mlink" id="refreshAutodeskTree" title="Refresh Autodesk files"/></div>
   <div id="dataManagementHubs" class="dataManagementHubs">
     tree here
   </div>

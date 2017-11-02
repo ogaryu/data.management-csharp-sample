@@ -60,8 +60,33 @@ function onDocumentLoadSuccess(doc) {
 function onDocumentLoadFailure(viewerErrorCode) { }
 
 function onItemLoadSuccess(viewer, item) {
-  var treeNode = $('#dataManagementHubs').jstree(true).get_selected(true)[0];
-  NOP_VIEWER.loadExtension('Autodesk.ADN.Viewing.Extension.MetaProperties', { 'url': treeNode.id, 'properties': ['Comments', 'Mark'] });
+  var tree = $('#dataManagementHubs').jstree(true);
+  var treeNode = tree.get_selected(true)[0];
+  NOP_VIEWER.loadExtension('Autodesk.ADN.Viewing.Extension.MetaProperties', {
+    'url': treeNode.id, 'properties': ['Comments', 'Mark'], 'callback': function (status, message, urn) {
+      switch (status) {
+        case 'PostJob':
+          $.notify("Posting job to Design Automation", "info");
+          break;
+        case 'JobCompleted':
+          var parent_node = tree.get_node(treeNode.parent);
+          tree.refresh_node(parent_node);
+          $.notify("Update complete: " + message, "info");
+          break;
+        case "TranslatingFile":
+          $.notify("Translating: " + message, "info");
+          break;
+        case "Completed":
+          var parent_node = tree.get_node(treeNode.parent);
+          tree.refresh_node(parent_node);
+          $.notify("All done! See new version", "success");
+          break;
+        case "Error":
+          $.notify("Error: " + message, "error");
+          break;
+      }
+    }
+  });
 }
 
 function onItemLoadFail(errorCode) { }

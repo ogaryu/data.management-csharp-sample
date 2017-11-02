@@ -64,6 +64,7 @@ Autodesk.ADN.Viewing.Extension.MetaProperties = function (viewer, options) {
     var _panel = this;
     var _properties = options.properties;
     var _versionUrl = options.url;
+    var _callback = options.callback;
 
     document.addEventListener("blur", onLeaveTextbox, true);
 
@@ -293,6 +294,8 @@ Autodesk.ADN.Viewing.Extension.MetaProperties = function (viewer, options) {
             });
           }
 
+          _callback('PostJob', 'Submiting job...');
+
           $.ajax({
             url: '/api/forge/revitio/updateParameters',
             contentType: 'application/json',
@@ -303,10 +306,16 @@ Autodesk.ADN.Viewing.Extension.MetaProperties = function (viewer, options) {
               'input': JSON.stringify(submitArray)
             }),
             success: function (res) {
-
+              if (res.Status) {
+                _callback('JobCompleted', res.Message, res.Urn);
+                //translationProgress(res.Urn);
+              }
+              else {
+                _callback('Error', res.Message);
+              }
             },
             error: function (res) {
-
+              _callback(res, 'Error');
             }
           });
         }
@@ -319,6 +328,24 @@ Autodesk.ADN.Viewing.Extension.MetaProperties = function (viewer, options) {
 
         viewer.toolbar.addControl(this.subToolbar);
       }
+    }
+
+    function translationProgress(urn) {
+      $.ajax({
+        url: '/api/forge/modelderivative/translation',
+        contentType: 'application/json',
+        type: 'POST',
+        //dataType: 'json', comment this to avoid parsing the response which would result in an error
+        data: JSON.stringify({
+          'urn': urn,
+        }),
+        success: function (res) {
+          
+        },
+        error: function (res) {
+          _callback(res, 'Error');
+        }
+      });
     }
 
     /////////////////////////////////////////////////////////////////
